@@ -39,7 +39,7 @@ public class UserRetrievalResource {
 
         try {
             // Decrypt password to get username
-            String username = decrypt(password);
+            String username = EncryptionUtil.decrypt(password);
 
             // Check if this user exists in DB (optional)
             User user = User.find("username", username).firstResult();
@@ -59,12 +59,5 @@ public class UserRetrievalResource {
         }
 
 
-    }
-    public static String decrypt(String encrypted) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, getKeySpec());
-        byte[] decodedBytes = Base64.getDecoder().decode(encrypted);
-        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
-        return new String(decryptedBytes);
     }
 }
