@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 @Consumes(MediaType.APPLICATION_JSON)
 public class RegisterResource {
 
-    private static final Object USERNAME_LOCK = new Object(); // for thread-safe username generation
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(8); // for parallel bulk ops
-
+    private static final Object USERNAME_LOCK = new Object();
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(8);
 
     @POST
     @Transactional
@@ -39,7 +38,7 @@ public class RegisterResource {
             return error("Email already exists", Response.Status.CONFLICT);
         }
 
-        String username = generateUniqueUsername(firstName);
+        String username = generateUniqueUsername(firstName, lastName, email);
         Log.debug("Generated unique username: " + username);
 
         String password;
@@ -87,7 +86,6 @@ public class RegisterResource {
         return Response.ok(results).build();
     }
 
-
     @Transactional
     protected Map<String, String> registerUser(Map<String, String> request) {
         Map<String, String> result = new HashMap<>();
@@ -110,7 +108,7 @@ public class RegisterResource {
                 return result;
             }
 
-            String username = generateUniqueUsername(firstName);
+            String username = generateUniqueUsername(firstName, lastName, email);
             String password = EncryptionUtil.encrypt(username);
 
             User user = new User();
@@ -123,7 +121,6 @@ public class RegisterResource {
 
             Log.infof("User registered in bulk: username=%s, email=%s", username, email);
 
-            // ✅ Return both username and password
             result.put("username", username);
             result.put("password", password);
             result.put("email", email);
@@ -138,10 +135,15 @@ public class RegisterResource {
     }
 
 
-
-    private String generateUniqueUsername(String firstName) {
+    private String generateUniqueUsername(String firstName, String lastName, String email) {
         synchronized (USERNAME_LOCK) {
             String baseUsername = firstName.toLowerCase();
+            if (lastName != null && !lastName.isBlank()) {
+                baseUsername += lastName.toLowerCase();
+            } else if (email != null && email.contains("@")) {
+                baseUsername += email.split("@")[0].toLowerCase();
+            }
+
             String username = baseUsername;
             int counter = 1;
             while (User.find("username", username).firstResult() != null) {

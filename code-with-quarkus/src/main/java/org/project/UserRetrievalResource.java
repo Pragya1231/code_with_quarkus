@@ -19,11 +19,6 @@ import org.jboss.logging.Logger;
 public class UserRetrievalResource {
 
     private static final Logger log = Logger.getLogger(UserRetrievalResource.class);
-    private static final String SECRET_KEY = "MySuperSecretKey";
-
-    private static SecretKeySpec getKeySpec() {
-        return new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
-    }
 
     @POST
     public Response retrieveUsername(Map<String, String> request) {

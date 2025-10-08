@@ -40,15 +40,4 @@ public class EncryptionUtil {
         return decrypted;
     }
 
-    /**
-     * Utility method to validate encryption-decryption consistency.
-     */
-    public static boolean verifyEncryption(String original, String encrypted) {
-        try {
-            return original.equals(decrypt(encrypted));
-        } catch (Exception e) {
-            Log.error("Encryption verification failed", e);
-            return false;
-        }
-    }
 }
